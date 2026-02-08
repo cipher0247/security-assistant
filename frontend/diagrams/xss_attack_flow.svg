@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <rect width="800" height="400" fill="#f8fafc" rx="10"/>
+  <text x="400" y="40" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="#1e293b">Cross-Site Scripting (XSS)</text>
+
+  <!-- Attacker -->
+  <text x="100" y="100" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle">Attacker</text>
+  <rect x="70" y="110" width="60" height="40" fill="#ef4444" rx="5"/>
+
+  <!-- Server -->
+  <text x="400" y="100" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle">Web Server</text>
+   <rect x="370" y="110" width="60" height="60" fill="#3b82f6" rx="5"/>
+
+  <!-- Victim -->
+  <text x="700" y="100" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle">Victim Browser</text>
+  <rect x="670" y="110" width="60" height="40" fill="#22c55e" rx="5"/>
+
+  <!-- Path 1 -->
+  <path d="M130,130 Q250,50 370,130" fill="none" stroke="#ef4444" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="250" y="80" font-family="Consolas" font-size="10" fill="#ef4444" text-anchor="middle">&lt;script&gt;steal()&lt;/script&gt;</text>
+  <text x="250" y="95" font-family="Arial" font-size="10" fill="#64748b" text-anchor="middle">1. Inject Malicious Script</text>
+
+  <!-- Path 2 -->
+  <path d="M430,140 Q550,140 670,140" fill="none" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="550" y="130" font-family="Arial" font-size="10" fill="#64748b" text-anchor="middle">2. Server Serves Script</text>
+
+  <!-- Path 3 -->
+  <path d="M700,150 Q700,250 130,150" fill="none" stroke="#22c55e" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow)"/>
+  <text x="400" y="250" font-family="Arial" font-size="10" fill="#64748b" text-anchor="middle">3. Script Executes & Sends Cookies</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#333" />
+    </marker>
+  </defs>
+</svg>

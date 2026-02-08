@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <rect width="800" height="400" fill="#f8fafc" rx="10"/>
+  <text x="400" y="40" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="#1e293b">Phishing Attack Lifecycle</text>
+
+  <!-- Steps -->
+  <g transform="translate(50, 150)">
+    <circle cx="50" cy="50" r="40" fill="#fff" stroke="#ef4444" stroke-width="2"/>
+    <text x="50" y="45" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle">1. Setup</text>
+    <text x="50" y="65" font-family="Arial" font-size="10" text-anchor="middle" fill="#64748b">Fake Site</text>
+  </g>
+
+  <g transform="translate(250, 150)">
+    <circle cx="50" cy="50" r="40" fill="#fff" stroke="#f59e0b" stroke-width="2"/>
+    <text x="50" y="45" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle">2. Lure</text>
+    <text x="50" y="65" font-family="Arial" font-size="10" text-anchor="middle" fill="#64748b">Email/SMS</text>
+  </g>
+
+  <g transform="translate(450, 150)">
+    <circle cx="50" cy="50" r="40" fill="#fff" stroke="#3b82f6" stroke-width="2"/>
+    <text x="50" y="45" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle">3. Action</text>
+    <text x="50" y="65" font-family="Arial" font-size="10" text-anchor="middle" fill="#64748b">User Clicks</text>
+  </g>
+
+  <g transform="translate(650, 150)">
+    <circle cx="50" cy="50" r="40" fill="#fff" stroke="#22c55e" stroke-width="2"/>
+    <text x="50" y="45" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle">4. Impact</text>
+    <text x="50" y="65" font-family="Arial" font-size="10" text-anchor="middle" fill="#64748b">Data Stolen</text>
+  </g>
+
+  <!-- Connectors -->
+  <line x1="150" y1="200" x2="250" y2="200" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,5"/>
+  <line x1="350" y1="200" x2="450" y2="200" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,5"/>
+  <line x1="550" y1="200" x2="650" y2="200" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,5"/>
+
+</svg>
