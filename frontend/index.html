@@ -189,6 +189,15 @@
                 </svg>
                 CyberPedia
             </button>
+            <button onclick="switchTab('personal'); loadPersonalSecurity();" id="nav-personal"
+                class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-700/50 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                    </path>
+                </svg>
+                Personal Security
+            </button>
             <button onclick="switchTab('report')" id="nav-report"
                 class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-700/50 transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -624,6 +633,79 @@
                                 </div>
                                 <ul id="email-triggers" class="list-disc pl-5 text-sm text-slate-400 space-y-1"></ul>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Security View -->
+            <div id="view-personal" class="hidden space-y-8 max-w-5xl mx-auto animate-fade-in">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-white">Personal Security</h2>
+                    <p class="text-slate-400">Simple tools to protect your digital life.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Privacy Checklists -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-white mb-4">Privacy Checklists</h3>
+                        <p class="text-slate-400 text-sm mb-4">Secure your social media accounts.</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="openChecklist('facebook')" class="p-4 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/50 rounded-xl flex flex-col items-center gap-2 transition-all">
+                                <span class="text-2xl">f</span>
+                                <span class="text-sm font-bold text-blue-200">Facebook</span>
+                            </button>
+                            <button onclick="openChecklist('instagram')" class="p-4 bg-pink-600/20 hover:bg-pink-600/40 border border-pink-500/50 rounded-xl flex flex-col items-center gap-2 transition-all">
+                                <span class="text-2xl">📸</span>
+                                <span class="text-sm font-bold text-pink-200">Instagram</span>
+                            </button>
+                            <button onclick="openChecklist('google')" class="p-4 bg-red-600/20 hover:bg-red-600/40 border border-red-500/50 rounded-xl flex flex-col items-center gap-2 transition-all">
+                                <span class="text-2xl">G</span>
+                                <span class="text-sm font-bold text-red-200">Google</span>
+                            </button>
+                            <button onclick="openChecklist('linkedin')" class="p-4 bg-sky-600/20 hover:bg-sky-600/40 border border-sky-500/50 rounded-xl flex flex-col items-center gap-2 transition-all">
+                                <span class="text-2xl">in</span>
+                                <span class="text-sm font-bold text-sky-200">LinkedIn</span>
+                            </button>
+                        </div>
+                        <!-- Modal is shared or specific? Let's use a shared modal structure here -->
+                        <div id="checklist-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
+                            <div class="glass-panel p-6 rounded-xl max-w-lg w-full m-4 relative border border-slate-600 shadow-2xl">
+                                <button onclick="closeChecklist()" class="absolute top-4 right-4 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full p-1 transition-colors">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                                <h3 id="checklist-title" class="text-xl font-bold text-white mb-4 flex items-center gap-2">Checklist</h3>
+                                <div id="checklist-steps" class="space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar p-1"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scam Identifier -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-white mb-4">Is this a Scam?</h3>
+                        <p class="text-slate-400 text-sm mb-4">Answer a few questions to find out.</p>
+                        <div id="scam-wizard" class="bg-slate-800/50 p-4 rounded-xl min-h-[200px] flex flex-col justify-center items-center text-center border border-slate-700/50">
+                            <button onclick="startScamWizard()" class="py-3 px-6 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold shadow-lg shadow-purple-600/20 transition-all transform hover:scale-105">Start Wizard</button>
+                        </div>
+                    </div>
+
+                    <!-- Am I Hacked? -->
+                    <div class="glass-panel p-6 rounded-xl">
+                         <h3 class="text-xl font-bold text-white mb-4">Am I Hacked?</h3>
+                         <p class="text-slate-400 text-sm mb-4">Select symptoms you are experiencing.</p>
+                         <div id="symptom-list" class="space-y-2 h-48 overflow-y-auto custom-scrollbar mb-4 bg-slate-900/30 p-2 rounded">
+                             <p class="text-slate-500 text-sm text-center pt-4">Loading symptoms...</p>
+                         </div>
+                         <button onclick="checkSymptoms()" class="w-full py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg font-bold shadow-lg shadow-red-600/20 transition-all">Check Risk</button>
+                         <div id="symptom-result" class="hidden mt-4 p-3 bg-slate-800 rounded border-l-4 border-red-500 animate-fade-in"></div>
+                    </div>
+
+                    <!-- Digital Declutter -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-white mb-4">Digital Declutter</h3>
+                        <p class="text-slate-400 text-sm mb-4">Steps to clean up your digital life.</p>
+                        <div id="declutter-list" class="space-y-3 h-64 overflow-y-auto custom-scrollbar pr-2">
+                             <p class="text-slate-500 text-sm text-center pt-4">Loading guide...</p>
                         </div>
                     </div>
                 </div>

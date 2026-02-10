@@ -129,9 +129,27 @@ async def check_password(request: PasswordRequest):
 async def calc_hash(request: HashRequest):
     return HashCalculator.calculate_hashes(request.text)
 
+from utils.personal_security import privacy_checklists, scam_decision_tree, hacked_symptoms, digital_declutter_steps
+
 @app.get("/api/education/glossary")
 async def get_glossary():
     return glossary_data
+
+@app.get("/api/personal/choices")
+async def get_privacy_choices():
+    return privacy_checklists
+
+@app.get("/api/personal/scam-tree")
+async def get_scam_tree():
+    return scam_decision_tree
+
+@app.get("/api/personal/symptoms")
+async def get_symptoms():
+    return hacked_symptoms
+
+@app.get("/api/personal/declutter")
+async def get_declutter():
+    return digital_declutter_steps
 
 # CORS Configuration
 origins = [
