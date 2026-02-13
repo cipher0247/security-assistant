@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 import os
+import tempfile
 
 from scanners.file_scan import FileScanner
 from scanners.url_scan import UrlScanner
@@ -203,3 +204,42 @@ async def scan_url(request: UrlScanRequest):
     scan_result['risk_level'] = risk_level
     
     return scan_result
+
+# Deepfake Detection
+from utils.deepfake_detector import DeepfakeDetector
+import shutil
+
+@app.post("/api/scan/deepfake")
+async def scan_deepfake(file: UploadFile = File(...)):
+    if not file:
+        raise HTTPException(status_code=400, detail="No file uploaded")
+    
+    content_type = file.content_type
+    
+    if content_type.startswith('image/'):
+        content = await file.read()
+        result = DeepfakeDetector.run_ela(content)
+        if not result:
+            raise HTTPException(status_code=500, detail="ELA Analysis Failed")
+        return {"type": "image", "result": result}
+        
+    elif content_type.startswith('video/'):
+        # Save temp file
+        temp_dir = tempfile.gettempdir()
+        temp_path = os.path.join(temp_dir, f"temp_{file.filename}")
+        
+        with open(temp_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        try:
+            result = DeepfakeDetector.process_video(temp_path)
+            if not result:
+                raise HTTPException(status_code=500, detail="Video Analysis Failed")
+            return {"type": "video", "result": result}
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+                
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported file type")
+

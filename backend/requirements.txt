@@ -5,3 +5,4 @@ pydantic
 requests
 Pillow
 feedparser
+opencv-python-headless

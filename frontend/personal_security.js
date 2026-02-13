@@ -178,3 +178,116 @@ function toggleDeclutter(idx) {
     document.cookie = `declutter_progress=${encodeURIComponent(JSON.stringify(saved))}; max-age=31536000; path=/`;
     loadDeclutter(); // Re-render
 }
+
+// 5. Deepfake Detector UI
+function openDeepfakeTool() {
+    document.getElementById('deepfake-modal').classList.remove('hidden');
+    // Reset state
+    document.getElementById('deepfake-upload').classList.remove('hidden');
+    document.getElementById('deepfake-loading').classList.add('hidden');
+    document.getElementById('deepfake-result').classList.add('hidden');
+    document.getElementById('deepfake-input').value = '';
+}
+
+async function analyzeDeepfake() {
+    const input = document.getElementById('deepfake-input');
+    if (!input.files || !input.files[0]) return;
+
+    const file = input.files[0];
+    const isVideo = file.type.startsWith('video/');
+
+    // Show loading
+    document.getElementById('deepfake-upload').classList.add('hidden');
+    document.getElementById('deepfake-loading').classList.remove('hidden');
+
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch(`${API_BASE}/api/scan/deepfake`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!res.ok) throw new Error('Analysis failed');
+
+        const data = await res.json();
+        const result = data.result;
+
+        document.getElementById('deepfake-loading').classList.add('hidden');
+        document.getElementById('deepfake-result').classList.remove('hidden');
+
+        const originalImg = document.getElementById('deepfake-original-img');
+        const originalVideo = document.getElementById('deepfake-original-video');
+        const elaImg = document.getElementById('deepfake-ela-img');
+        const riskPanel = document.getElementById('deepfake-risk-panel');
+
+        if (isVideo) {
+            originalImg.classList.add('hidden');
+            originalVideo.classList.remove('hidden');
+            originalVideo.src = URL.createObjectURL(file);
+
+            // Show first frame ELA or placeholder
+            if (result.frames && result.frames.length > 0) {
+                elaImg.src = result.frames[1].ela_image || result.frames[0].ela_image;
+            }
+
+            document.getElementById('deepfake-frames-container').classList.remove('hidden');
+            document.getElementById('deepfake-frames-grid').innerHTML = result.frames.map((f, i) => `
+                <div class="min-w-[150px] aspect-video bg-slate-800 rounded border border-slate-700 overflow-hidden relative group cursor-pointer"
+                    onclick="document.getElementById('deepfake-ela-img').src = '${f.ela_image}'">
+                    <img src="${f.ela_image}" class="w-full h-full object-cover">
+                    <div class="absolute bottom-0 left-0 bg-black/60 text-white text-[10px] px-1">Score: ${f.score}</div>
+                </div>
+            `).join('');
+        } else {
+            originalVideo.classList.add('hidden');
+            originalImg.classList.remove('hidden');
+            const url = URL.createObjectURL(file);
+            originalImg.src = url;
+
+            elaImg.style.filter = "none"; // Remove mock filter
+            elaImg.src = result.ela_image;
+
+            document.getElementById('deepfake-frames-container').classList.add('hidden');
+        }
+
+        // Result Panel
+        const score = result.score;
+        let riskColor = 'text-green-400';
+        let riskText = 'Likely Original';
+        let riskIcon = 'ok';
+
+        if (score > 60) {
+            riskColor = 'text-red-400';
+            riskText = 'Potential Deepfake';
+            riskIcon = 'warn';
+        } else if (score > 30) {
+            riskColor = 'text-yellow-400';
+            riskText = 'Suspicious';
+            riskIcon = 'warn';
+        }
+
+        riskPanel.innerHTML = `
+            <div>
+                <h3 class="text-2xl font-bold ${riskColor} mb-1">${riskText}</h3>
+                <p class="text-slate-400">Error Level Analysis complete. Score based on artifact variance.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">Suspicion Score</p>
+                    <p class="text-3xl font-bold ${riskColor}">${score}%</p>
+                </div>
+                <div class="w-16 h-16 rounded-full border-4 ${score > 50 ? 'border-red-500' : 'border-green-500'} flex items-center justify-center bg-slate-800">
+                    <span class="text-2xl">${score > 50 ? 'âš ï¸ ' : 'âœ…'}</span>
+                </div>
+            </div>
+        `;
+    } catch (e) {
+        console.error(e);
+        document.getElementById('deepfake-loading').classList.add('hidden');
+        element = document.getElementById('deepfake-upload');
+        element.classList.remove('hidden');
+        alert("Analysis failed. Please try a valid image/video file.");
+    }
+}

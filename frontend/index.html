@@ -401,7 +401,142 @@
                             </div>
                         </div>
 
-                        <!-- Checker View -->
+                        <!-- Deepfake Modal -->
+                        <div id="deepfake-modal"
+                            class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-fade-in">
+                            <div
+                                class="bg-slate-900 rounded-2xl border border-slate-700 w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl relative overflow-hidden">
+                                <!-- Background decorative elements -->
+                                <div
+                                    class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500">
+                                </div>
+
+                                <!-- Header -->
+                                <div
+                                    class="flex justify-between items-center p-6 border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm z-10">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-xl font-bold text-white">Deepfake Analysis</h3>
+                                            <p class="text-xs text-slate-400">Error Level Analysis (ELA) & Metadata
+                                                Inspection</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="document.getElementById('deepfake-modal').classList.add('hidden')"
+                                        class="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <!-- Content -->
+                                <div class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+
+                                    <!-- Upload Section -->
+                                    <div id="deepfake-upload"
+                                        class="flex flex-col items-center justify-center h-full min-h-[400px] border-2 border-dashed border-slate-700 rounded-2xl bg-slate-800/30 hover:bg-slate-800/50 hover:border-purple-500/50 transition-all cursor-pointer group"
+                                        onclick="document.getElementById('deepfake-input').click()">
+                                        <input type="file" id="deepfake-input" class="hidden" accept="image/*,video/*"
+                                            onchange="analyzeDeepfake()">
+                                        <div
+                                            class="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mb-6 shadow-xl group-hover:scale-110 transition-transform duration-300">
+                                            <svg class="w-10 h-10 text-purple-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <h4 class="text-2xl font-bold text-white mb-2">Upload Image or Video</h4>
+                                        <p class="text-slate-400 mb-8">Supports JPG, PNG, MP4, WEBM</p>
+                                        <button
+                                            class="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-medium shadow-lg shadow-purple-600/20 transition-all">Select
+                                            File</button>
+                                    </div>
+
+                                    <!-- Loading State -->
+                                    <div id="deepfake-loading"
+                                        class="hidden flex flex-col items-center justify-center h-full">
+                                        <div class="relative w-24 h-24">
+                                            <div class="absolute inset-0 rounded-full border-4 border-slate-700"></div>
+                                            <div
+                                                class="absolute inset-0 rounded-full border-4 border-t-purple-500 border-r-transparent border-b-transparent border-l-transparent animate-spin">
+                                            </div>
+                                        </div>
+                                        <h4 class="text-xl font-bold text-white mt-8 mb-2">Analyzing Media...</h4>
+                                        <p class="text-slate-400 animate-pulse">Running Error Level Analysis & Frame
+                                            Extraction</p>
+                                    </div>
+
+                                    <!-- Results View -->
+                                    <div id="deepfake-result" class="hidden space-y-8">
+                                        <!-- Top Bar: Risk Assessment -->
+                                        <div id="deepfake-risk-panel"
+                                            class="p-6 rounded-xl bg-slate-800 border border-slate-700 flex flex-col md:flex-row items-center justify-between gap-6">
+                                            <!-- Injected via JS -->
+                                        </div>
+
+                                        <!-- Comparison View -->
+                                        <div class="grid md:grid-cols-2 gap-6">
+                                            <div class="space-y-4">
+                                                <h4 class="text-lg font-bold text-white flex items-center gap-2">
+                                                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> Original
+                                                    Media
+                                                </h4>
+                                                <div
+                                                    class="aspect-video bg-black/50 rounded-xl overflow-hidden border border-slate-700 relative group">
+                                                    <img id="deepfake-original-img" src=""
+                                                        class="w-full h-full object-contain" alt="Original">
+                                                    <video id="deepfake-original-video"
+                                                        class="w-full h-full object-contain hidden" controls></video>
+                                                </div>
+                                            </div>
+                                            <div class="space-y-4">
+                                                <h4 class="text-lg font-bold text-white flex items-center gap-2">
+                                                    <span class="w-2 h-2 rounded-full bg-purple-500"></span> ELA
+                                                    Analysis
+                                                </h4>
+                                                <div
+                                                    class="aspect-video bg-black/50 rounded-xl overflow-hidden border border-slate-700 relative">
+                                                    <img id="deepfake-ela-img" src=""
+                                                        class="w-full h-full object-contain" alt="ELA Analysis">
+                                                    <div id="deepfake-ela-overlay"
+                                                        class="absolute inset-0 flex items-center justify-center bg-black/60 hidden">
+                                                        <p class="text-slate-300">Frame Analysis Available Below</p>
+                                                    </div>
+                                                </div>
+                                                <p class="text-xs text-slate-400 bg-slate-800/50 p-3 rounded">
+                                                    <strong class="text-purple-400">How to read:</strong> High-contrast
+                                                    white/colored noise in specific areas (faces, text) often indicates
+                                                    manipulation. Uniform noise usually indicates an original image.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Video Frames (Hidden for images) -->
+                                        <div id="deepfake-frames-container"
+                                            class="hidden pt-6 border-t border-slate-800">
+                                            <h4 class="text-lg font-bold text-white mb-4">Key Frame Analysis</h4>
+                                            <div id="deepfake-frames-grid"
+                                                class="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                                                <!-- Dynamic Frames -->
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div id="pass-tool-check">
                             <div class="mb-4">
                                 <input type="password" id="pass-input" placeholder="Enter password to test..."
