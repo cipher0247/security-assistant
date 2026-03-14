@@ -5,6 +5,7 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 import os
 import tempfile
+from dotenv import load_dotenv
 
 from scanners.file_scan import FileScanner
 from scanners.url_scan import UrlScanner
@@ -17,6 +18,10 @@ from utils.student_data import get_random_quiz, career_guide, cheat_sheets
 from utils.tools_extended import PasswordGenerator, SteganographyTool, ExifViewer, NewsFetcher
 from fastapi.responses import StreamingResponse
 from io import BytesIO
+from routes_nvidia_ai import router as nvidia_router
+
+# Load environment variables for NVIDIA API key and other config
+load_dotenv()
 
 app = FastAPI(
     title="Security Assistant API",
@@ -166,6 +171,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register NVIDIA AI routes
+app.include_router(nvidia_router, prefix="/api/security", tags=["NVIDIA AI Features"])
 
 # Mount Frontend (Static)
 frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")

@@ -2,7 +2,7 @@
 AI Services Layer
 =================
 Modular services for different cybersecurity capabilities.
-Each service uses NVIDIA AI for intelligent analysis and explanations.
+Each service uses Google Gemini AI for intelligent analysis and explanations.
 
 Services:
 - Phishing Analyzer
@@ -19,10 +19,10 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from nvidia_ai_integration import (
-    NVIDIAAIClient, 
+    GeminiAIClient, 
     AIResponse, 
-    NVIDIAAPIError,
-    get_nvidia_client
+    GeminiAPIError,
+    get_gemini_client
 )
 
 
@@ -60,8 +60,8 @@ class AnalysisResult:
 class PhishingAnalyzerService:
     """Analyzes emails and URLs for phishing indicators."""
     
-    def __init__(self, client: Optional[NVIDIAAIClient] = None):
-        self.client = client or get_nvidia_client()
+    def __init__(self, client: Optional[GeminiAIClient] = None):
+        self.client = client or get_gemini_client()
     
     def analyze_email(
         self, 
@@ -96,7 +96,7 @@ class PhishingAnalyzerService:
                 confidence=0.85
             )
             
-        except NVIDIAAPIError as e:
+        except GeminiAPIError as e:
             logger.error(f"Phishing analysis error: {e}")
             return AnalysisResult(
                 analysis_type="phishing_email",
@@ -127,7 +127,7 @@ class PhishingAnalyzerService:
                 confidence=0.85
             )
             
-        except NVIDIAAPIError as e:
+        except GeminiAPIError as e:
             logger.error(f"URL analysis error: {e}")
             return AnalysisResult(
                 analysis_type="phishing_url",
@@ -141,8 +141,8 @@ class PhishingAnalyzerService:
 class URLSecurityAnalyzerService:
     """Provides detailed URL security analysis with AI explanations."""
     
-    def __init__(self, client: Optional[NVIDIAAIClient] = None):
-        self.client = client or get_nvidia_client()
+    def __init__(self, client: Optional[GeminiAIClient] = None):
+        self.client = client or get_gemini_client()
     
     def analyze_with_context(
         self, 
@@ -178,7 +178,7 @@ class URLSecurityAnalyzerService:
                 confidence=0.88
             )
             
-        except NVIDIAAPIError as e:
+        except GeminiAPIError as e:
             logger.error(f"URL security analysis error: {e}")
             return AnalysisResult(
                 analysis_type="url_security",
@@ -192,8 +192,8 @@ class URLSecurityAnalyzerService:
 class PasswordCoachService:
     """Provides password security coaching and improvement suggestions."""
     
-    def __init__(self, client: Optional[NVIDIAAIClient] = None):
-        self.client = client or get_nvidia_client()
+    def __init__(self, client: Optional[GeminiAIClient] = None):
+        self.client = client or get_gemini_client()
     
     def explain_weakness(
         self,
@@ -235,7 +235,7 @@ class PasswordCoachService:
                 confidence=0.90
             )
             
-        except NVIDIAAPIError as e:
+        except GeminiAPIError as e:
             logger.error(f"Password coaching error: {e}")
             return AnalysisResult(
                 analysis_type="password_coaching",
@@ -249,8 +249,8 @@ class PasswordCoachService:
 class FileSecurityService:
     """Analyzes file risks and explains malware indicators."""
     
-    def __init__(self, client: Optional[NVIDIAAIClient] = None):
-        self.client = client or get_nvidia_client()
+    def __init__(self, client: Optional[GeminiAIClient] = None):
+        self.client = client or get_gemini_client()
     
     def explain_risk(
         self,
@@ -292,7 +292,7 @@ class FileSecurityService:
                 confidence=0.82
             )
             
-        except NVIDIAAPIError as e:
+        except GeminiAPIError as e:
             logger.error(f"File risk analysis error: {e}")
             return AnalysisResult(
                 analysis_type="file_risk",
@@ -306,8 +306,8 @@ class FileSecurityService:
 class CybersecurityChatbotService:
     """General-purpose cybersecurity Q&A chatbot."""
     
-    def __init__(self, client: Optional[NVIDIAAIClient] = None):
-        self.client = client or get_nvidia_client()
+    def __init__(self, client: Optional[GeminiAIClient] = None):
+        self.client = client or get_gemini_client()
         self.conversation_history: List[Dict[str, str]] = []
     
     def ask_question(self, question: str) -> AnalysisResult:
@@ -363,8 +363,8 @@ class CybersecurityChatbotService:
 class ThreatExplainerService:
     """Explains cybersecurity threats in educational detail."""
     
-    def __init__(self, client: Optional[NVIDIAAIClient] = None):
-        self.client = client or get_nvidia_client()
+    def __init__(self, client: Optional[GeminiAIClient] = None):
+        self.client = client or get_gemini_client()
     
     def explain_threat(self, threat_type: str, context: str = "") -> AnalysisResult:
         """
@@ -392,7 +392,7 @@ class ThreatExplainerService:
                 confidence=0.87
             )
             
-        except NVIDIAAPIError as e:
+        except GeminiAPIError as e:
             logger.error(f"Threat explanation error: {e}")
             return AnalysisResult(
                 analysis_type="threat_explanation",
@@ -424,7 +424,7 @@ class ThreatExplainerService:
                 confidence=0.86
             )
             
-        except NVIDIAAPIError as e:
+        except GeminiAPIError as e:
             logger.error(f"Best practice explanation error: {e}")
             return AnalysisResult(
                 analysis_type="best_practice",
@@ -442,12 +442,12 @@ class ThreatExplainerService:
 class AIServicesFactory:
     """Factory for creating AI service instances."""
     
-    _client: Optional[NVIDIAAIClient] = None
+    _client: Optional[GeminiAIClient] = None
     _services: Dict[str, Any] = {}
     
     @classmethod
-    def set_client(cls, client: NVIDIAAIClient):
-        """Set custom NVIDIA AI client."""
+    def set_client(cls, client: GeminiAIClient):
+        """Set custom Gemini AI client."""
         cls._client = client
     
     @classmethod

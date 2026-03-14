@@ -1,7 +1,7 @@
 """
-NVIDIA AI Integration Routes
+Gemini AI Integration Routes
 =============================
-FastAPI endpoints that connect the frontend to NVIDIA AI services.
+FastAPI endpoints that connect the frontend to Gemini AI services.
 
 Endpoints:
 - POST /api/security/nvidia/explain-phishing
@@ -24,7 +24,7 @@ from pydantic import BaseModel, Field
 from ai_services import (
     AIServicesFactory,
     AnalysisResult,
-    NVIDIAAPIError
+    GeminiAPIError
 )
 
 
@@ -613,12 +613,12 @@ async def clear_chat_history():
 @router.get(
     "/usage-stats",
     response_model=UsageStatsResponse,
-    summary="Get NVIDIA API usage statistics",
+    summary="Get Gemini API usage statistics",
     description="Retrieve usage statistics and cost information"
 )
 async def get_usage_stats():
     """
-    Get NVIDIA API usage statistics.
+    Get Gemini API usage statistics.
     
     Returns:
     - Total requests made
@@ -659,12 +659,12 @@ async def get_usage_stats():
 
 @router.get(
     "/health",
-    summary="Check NVIDIA AI service health",
-    description="Health check for NVIDIA AI integration"
+    summary="Check Gemini AI service health",
+    description="Health check for Gemini AI integration"
 )
 async def health_check():
     """
-    Check if NVIDIA AI service is operational.
+    Check if Gemini AI service is operational.
     
     Returns:
     - Service status (operational/degraded/offline)
@@ -674,8 +674,8 @@ async def health_check():
     try:
         return {
             "status": "operational",
-            "service": "NVIDIA AI Integration",
-            "api_endpoint": "https://integrate.api.nvidia.com/v1",
+            "service": "Gemini AI Integration",
+            "api_endpoint": "https://generativelanguage.googleapis.com",
             "timestamp": str(datetime.now().isoformat())
         }
     except Exception as e:

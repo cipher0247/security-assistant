@@ -1,18 +1,18 @@
 """
-NVIDIA AI Integration Module
-=============================
-Integrates NVIDIA AI models for intelligent cybersecurity analysis and explanations.
+Google Gemini AI Integration Module
+====================================
+Integrates Google Gemini AI models for intelligent cybersecurity analysis and explanations.
 
 Supported Models:
-- meta/llama-3.1-70b-instruct (Main AI Assistant - most capable)
-- meta/llama-3.1-8b-instruct (Fast Analysis - quick responses)
-- nvidia/nv-embedqa-e5-v5 (Embeddings - knowledge search)
+- gemini-2.0-flash (Main AI Assistant - most capable and fastest)
+- gemini-1.5-pro (Advanced analysis)
+- gemini-1.5-flash (Quick responses)
 
 Documentation:
-https://build.nvidia.com/meta/llama-3-1-70b-instruct
+https://ai.google.dev/gemini-api
 
 Example API Key Format:
-nvapi-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+AIzaSy... (get from https://makersuite.google.com/app/apikey)
 """
 
 import os
@@ -22,11 +22,11 @@ from dataclasses import dataclass
 from datetime import datetime
 import logging
 
-# OpenAI SDK is compatible with NVIDIA API
+# Google Generative AI SDK
 try:
-    from openai import OpenAI
+    import google.generativeai as genai
 except ImportError:
-    raise ImportError("Install openai: pip install openai")
+    raise ImportError("Install google-generativeai: pip install google-generativeai")
 
 
 logger = logging.getLogger(__name__)
@@ -53,51 +53,45 @@ class AIResponse:
         }
 
 
-class NVIDIAAPIError(Exception):
-    """Custom exception for NVIDIA API errors"""
+class GeminiAPIError(Exception):
+    """Custom exception for Gemini API errors"""
     pass
 
 
-class NVIDIAAIClient:
+class GeminiAIClient:
     """
-    NVIDIA AI Client for interacting with NVIDIA AI Foundation Models.
+    Google Gemini AI Client for intelligent cybersecurity analysis.
     
-    Uses OpenAI SDK for API compatibility.
-    Endpoints: https://integrate.api.nvidia.com/v1
+    Uses Google's Generative AI SDK.
+    Endpoints: https://generativelanguage.googleapis.com
     """
     
     # Available models
-    MODEL_MAIN = "meta/llama-3.1-70b-instruct"  # Most capable (70B parameters)
-    MODEL_FAST = "meta/llama-3.1-8b-instruct"   # Fast responses (8B parameters)
-    MODEL_EMBEDDING = "nvidia/nv-embedqa-e5-v5" # Knowledge search
+    MODEL_MAIN = "gemini-2.0-flash"      # Most capable and fastest
+    MODEL_PRO = "gemini-1.5-pro"         # Advanced analysis
+    MODEL_FAST = "gemini-1.5-flash"      # Quick responses
     
     def __init__(self, api_key: Optional[str] = None):
         """
-        Initialize NVIDIA AI client.
+        Initialize Gemini AI client.
         
         Args:
-            api_key: NVIDIA API key. If None, reads from NVIDIA_API_KEY env var.
-                    Format: nvapi-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            api_key: Google Gemini API key. If None, reads from GOOGLE_GEMINI_API_KEY env var.
+                    Get from: https://makersuite.google.com/app/apikey
         
         Raises:
-            NVIDIAAPIError: If API key is missing or invalid
+            GeminiAPIError: If API key is missing or invalid
         """
-        self.api_key = api_key or os.getenv("NVIDIA_API_KEY")
+        self.api_key = api_key or os.getenv("GOOGLE_GEMINI_API_KEY")
         
         if not self.api_key:
-            raise NVIDIAAPIError(
-                "NVIDIA API key not found. Set NVIDIA_API_KEY environment variable. "
-                "Get your key from: https://build.nvidia.com"
+            raise GeminiAPIError(
+                "Google Gemini API key not found. Set GOOGLE_GEMINI_API_KEY environment variable. "
+                "Get your key from: https://makersuite.google.com/app/apikey"
             )
         
-        if not self.api_key.startswith("nvapi-"):
-            logger.warning("NVIDIA API key should start with 'nvapi-'. Got: %s", self.api_key[:10])
-        
-        # Initialize OpenAI client with NVIDIA endpoint
-        self.client = OpenAI(
-            base_url="https://integrate.api.nvidia.com/v1",
-            api_key=self.api_key
-        )
+        # Configure Gemini API
+        genai.configure(api_key=self.api_key)
         
         self.request_count = 0
         self.total_tokens = 0
@@ -107,81 +101,87 @@ class NVIDIAAIClient:
         model: str,
         messages: List[Dict[str, str]],
         temperature: float = 0.2,
-        top_p: float = 0.7,
         max_tokens: int = 1024,
-        stream: bool = False,
         system_prompt: Optional[str] = None
     ) -> AIResponse:
         """
-        Generate response from NVIDIA AI model.
+        Generate response from Gemini AI model.
         
         Args:
             model: Model name (use MODEL_MAIN, MODEL_FAST constants)
             messages: List of message dicts with 'role' and 'content'
             temperature: 0.0-1.0 (0=deterministic, 1=creative)
-            top_p: Nucleus sampling parameter
             max_tokens: Maximum response tokens
-            stream: Whether to stream response
             system_prompt: Optional system prompt to prepend
         
         Returns:
             AIResponse: The generated response
             
         Raises:
-            NVIDIAAPIError: If API call fails
+            GeminiAPIError: If API call fails
         """
         try:
-            # Add system prompt if provided
-            if system_prompt:
-                messages = [
-                    {"role": "system", "content": system_prompt}
-                ] + messages
+            # Get Gemini model
+            gemini_model = genai.GenerativeModel(model)
             
-            # Call NVIDIA API
-            completion = self.client.chat.completions.create(
-                model=model,
-                messages=messages,
-                temperature=temperature,
-                top_p=top_p,
-                max_tokens=max_tokens,
-                stream=False  # Use non-streaming for simplicity
+            # Build prompt with system message if provided
+            if system_prompt:
+                full_prompt = f"{system_prompt}\n\n"
+            else:
+                full_prompt = ""
+            
+            # Add user messages to prompt
+            for msg in messages:
+                if msg['role'] == 'user':
+                    full_prompt += msg['content']
+                elif msg['role'] == 'assistant':
+                    full_prompt += f"\n\nAssistant: {msg['content']}\n\n"
+            
+            # Call Gemini API
+            response = gemini_model.generate_content(
+                full_prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=temperature,
+                    max_output_tokens=max_tokens,
+                ),
             )
             
             # Extract response
-            content = completion.choices[0].message.content
-            tokens = completion.usage.total_tokens
+            content = response.text
+            
+            # Estimate tokens (Gemini doesn't always provide exact token count)
+            estimated_tokens = len(content.split()) + len(full_prompt.split())
             
             # Track usage
             self.request_count += 1
-            self.total_tokens += tokens
+            self.total_tokens += estimated_tokens
             
-            response = AIResponse(
+            result = AIResponse(
                 content=content,
                 model=model,
-                tokens_used=tokens,
+                tokens_used=estimated_tokens,
                 temperature=temperature,
                 timestamp=datetime.now()
             )
             
-            logger.info(f"NVIDIA API call successful. Tokens: {tokens}, Total: {self.total_tokens}")
-            return response
+            logger.info(f"Gemini API call successful. Est. tokens: {estimated_tokens}, Total: {self.total_tokens}")
+            return result
             
         except Exception as e:
-            error_msg = f"NVIDIA API Error: {str(e)}"
+            error_msg = f"Gemini API Error: {str(e)}"
             logger.error(error_msg)
-            raise NVIDIAAPIError(error_msg) from e
+            raise GeminiAPIError(error_msg) from e
     
     def generate_stream(
         self,
         model: str,
         messages: List[Dict[str, str]],
         temperature: float = 0.2,
-        top_p: float = 0.7,
         max_tokens: int = 1024,
         system_prompt: Optional[str] = None
     ) -> Generator[str, None, None]:
         """
-        Generate streaming response from NVIDIA AI model.
+        Generate streaming response from Gemini AI model.
         
         Yields individual tokens as they're generated.
         
@@ -189,7 +189,6 @@ class NVIDIAAIClient:
             model: Model name
             messages: Chat messages
             temperature: Generation temperature
-            top_p: Nucleus sampling
             max_tokens: Max response length
             system_prompt: Optional system prompt
         
@@ -197,33 +196,43 @@ class NVIDIAAIClient:
             str: Individual response tokens
         """
         try:
-            # Add system prompt if provided
+            # Get Gemini model
+            gemini_model = genai.GenerativeModel(model)
+            
+            # Build prompt with system message if provided
             if system_prompt:
-                messages = [
-                    {"role": "system", "content": system_prompt}
-                ] + messages
+                full_prompt = f"{system_prompt}\n\n"
+            else:
+                full_prompt = ""
+            
+            # Add user messages to prompt
+            for msg in messages:
+                if msg['role'] == 'user':
+                    full_prompt += msg['content']
+                elif msg['role'] == 'assistant':
+                    full_prompt += f"\n\nAssistant: {msg['content']}\n\n"
             
             # Call with streaming
-            completion = self.client.chat.completions.create(
-                model=model,
-                messages=messages,
-                temperature=temperature,
-                top_p=top_p,
-                max_tokens=max_tokens,
+            response = gemini_model.generate_content(
+                full_prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=temperature,
+                    max_output_tokens=max_tokens,
+                ),
                 stream=True
             )
             
             # Stream tokens
-            for chunk in completion:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
+            for chunk in response:
+                if chunk.text:
+                    yield chunk.text
             
             self.request_count += 1
             
         except Exception as e:
-            error_msg = f"NVIDIA Streaming API Error: {str(e)}"
+            error_msg = f"Gemini Streaming API Error: {str(e)}"
             logger.error(error_msg)
-            raise NVIDIAAPIError(error_msg) from e
+            raise GeminiAPIError(error_msg) from e
     
     def explain_phishing(self, email_content: str, subject: str = "") -> AIResponse:
         """Explain phishing indicators in email."""
@@ -380,12 +389,18 @@ Rules:
 # Global client instance (lazy loaded)
 _client_instance = None
 
-def get_nvidia_client() -> NVIDIAAIClient:
-    """Get or create NVIDIA AI client (singleton)."""
+def get_gemini_client() -> GeminiAIClient:
+    """Get or create Gemini AI client (singleton)."""
     global _client_instance
     if _client_instance is None:
-        _client_instance = NVIDIAAIClient()
+        _client_instance = GeminiAIClient()
     return _client_instance
+
+
+# Keep backward compatibility with old function name
+def get_nvidia_client() -> GeminiAIClient:
+    """Deprecated: Use get_gemini_client() instead. Kept for backward compatibility."""
+    return get_gemini_client()
 
 
 # ============================================================================
@@ -402,15 +417,15 @@ if __name__ == "__main__":
     )
     
     print("=" * 70)
-    print("NVIDIA AI Integration - Examples")
+    print("Google Gemini AI Integration - Examples")
     print("=" * 70)
     print()
     
     try:
         # Initialize client
-        client = NVIDIAAIClient()
-        print("✓ NVIDIA AI client initialized successfully")
-        print(f"✓ Using API: https://integrate.api.nvidia.com/v1")
+        client = GeminiAIClient()
+        print("✓ Gemini AI client initialized successfully")
+        print(f"✓ Using API: https://generativelanguage.googleapis.com")
         print()
         
         # Example 1: Phishing Email Analysis
@@ -437,7 +452,7 @@ if __name__ == "__main__":
             response = client.explain_phishing(email, subject="URGENT: Verify your account")
             print(f"\n{response.content}")
             print(f"\n📊 Tokens used: {response.tokens_used}")
-        except NVIDIAAPIError as e:
+        except GeminiAPIError as e:
             print(f"Error: {e}")
         print()
         
@@ -451,7 +466,7 @@ if __name__ == "__main__":
             response = client.analyze_url_safety(url)
             print(f"\n{response.content}")
             print(f"\n📊 Tokens used: {response.tokens_used}")
-        except NVIDIAAPIError as e:
+        except GeminiAPIError as e:
             print(f"Error: {e}")
         print()
         
@@ -480,7 +495,7 @@ if __name__ == "__main__":
             response = client.explain_password_weakness(password_analysis)
             print(f"\n{response.content}")
             print(f"\n📊 Tokens used: {response.tokens_used}")
-        except NVIDIAAPIError as e:
+        except GeminiAPIError as e:
             print(f"Error: {e}")
         print()
         
@@ -495,7 +510,7 @@ if __name__ == "__main__":
             print(f"Question: {question}")
             print(f"\n{response.content}")
             print(f"\n📊 Tokens used: {response.tokens_used}")
-        except NVIDIAAPIError as e:
+        except GeminiAPIError as e:
             print(f"Error: {e}")
         print()
         
@@ -508,7 +523,7 @@ if __name__ == "__main__":
         print(f"Total tokens used: {stats['total_tokens_used']}")
         print(f"Avg tokens per request: {stats['average_tokens_per_request']}")
         
-    except NVIDIAAPIError as e:
+    except GeminiAPIError as e:
         print(f"❌ {e}")
         sys.exit(1)
     except KeyboardInterrupt:
